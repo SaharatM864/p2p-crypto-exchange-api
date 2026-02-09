@@ -1,0 +1,258 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// ENUMS
+// --------------------------------------
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_KYC
+}
+
+enum CurrencyType {
+  CRYPTO
+  FIAT
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  OPEN
+  PARTIAL
+  COMPLETED
+  CANCELLED
+}
+
+enum TradeStatus {
+  PENDING_PAYMENT
+  PAID
+  COMPLETED
+  DISPUTED
+  CANCELLED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRADE
+  TRANSFER
+  FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  POSTED
+  VOIDED
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+enum TransferDirection {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum TransferStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+// --------------------------------------
+// MODELS
+// --------------------------------------
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  fullName      String    @map("full_name")
+  status        UserStatus @default(PENDING_KYC)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  wallets       Wallet[]
+  orders        Order[]
+  buyerTrades   Trade[]   @relation("BuyerTrades")
+  sellerTrades  Trade[]   @relation("SellerTrades")
+  externalTransfers ExternalTransfer[]
+
+  @@map("users")
+}
+
+model Currency {
+  code          String       @id
+  name          String
+  type          CurrencyType
+  decimalPlaces Int          @map("decimal_places")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  wallets       Wallet[]
+  cryptoOrders  Order[]      @relation("CryptoCurrency")
+  fiatOrders    Order[]      @relation("FiatCurrency")
+
+  @@map("currencies")
+}
+
+model Wallet {
+  id               String       @id @default(uuid())
+  userId           String       @map("user_id")
+  currencyCode     String       @map("currency_code")
+  
+  // Using Decimal for precise financial calculations
+  // Corresponds to NUMERIC(36, 18)
+  availableBalance Decimal      @default(0) @map("available_balance") @db.Decimal(36, 18)
+  pendingBalance   Decimal      @default(0) @map("pending_balance") @db.Decimal(36, 18)
+  lockedBalance    Decimal      @default(0) @map("locked_balance") @db.Decimal(36, 18)
+  
+  status           WalletStatus @default(ACTIVE)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  user             User         @relation(fields: [userId], references: [id])
+  currency         Currency     @relation(fields: [currencyCode], references: [code])
+  ledgerEntries    LedgerEntry[]
+  externalTransfers ExternalTransfer[]
+
+  @@unique([userId, currencyCode])
+  @@map("wallets")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String      @map("user_id")
+  side            OrderSide
+  cryptoCurrency  String      @map("crypto_currency")
+  fiatCurrency    String      @map("fiat_currency")
+  
+  price           Decimal     @db.Decimal(20, 8)
+  totalAmount     Decimal     @map("total_amount") @db.Decimal(36, 18)
+  filledAmount    Decimal     @default(0) @map("filled_amount") @db.Decimal(36, 18)
+  minLimit        Decimal?    @map("min_limit") @db.Decimal(20, 2)
+  maxLimit        Decimal?    @map("max_limit") @db.Decimal(20, 2)
+  
+  status          OrderStatus @default(OPEN)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  crypto          Currency    @relation("CryptoCurrency", fields: [cryptoCurrency], references: [code])
+  fiat            Currency    @relation("FiatCurrency", fields: [fiatCurrency], references: [code])
+  trades          Trade[]
+
+  // Indexes for querying open orders
+  @@index([status, cryptoCurrency, fiatCurrency])
+  @@map("orders")
+}
+
+model Trade {
+  id            String      @id @default(uuid())
+  orderId       String      @map("order_id")
+  buyerId       String      @map("buyer_id")
+  sellerId      String      @map("seller_id")
+  
+  cryptoAmount  Decimal     @map("crypto_amount") @db.Decimal(36, 18)
+  fiatAmount    Decimal     @map("fiat_amount") @db.Decimal(20, 2)
+  price         Decimal     @db.Decimal(20, 8)
+  
+  status        TradeStatus @default(PENDING_PAYMENT)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  completedAt   DateTime?   @map("completed_at")
+
+  // Relations
+  order         Order       @relation(fields: [orderId], references: [id])
+  buyer         User        @relation("BuyerTrades", fields: [buyerId], references: [id])
+  seller        User        @relation("SellerTrades", fields: [sellerId], references: [id])
+
+  @@index([status])
+  @@map("trades")
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  idempotencyKey String?           @unique @map("idempotency_key")
+  type           TransactionType
+  status         TransactionStatus @default(PENDING)
+  description    String?
+  metadata       Json?             @db.JsonB
+  createdAt      DateTime          @default(now()) @map("created_at")
+  postedAt       DateTime?         @map("posted_at")
+
+  // Relations
+  ledgerEntries  LedgerEntry[]
+
+  @@map("transactions")
+}
+
+model LedgerEntry {
+  id            String      @id @default(uuid())
+  transactionId String      @map("transaction_id")
+  walletId      String      @map("wallet_id")
+  
+  amount        Decimal     @db.Decimal(36, 18) // Positive = In, Negative = Out
+  balanceAfter  Decimal     @map("balance_after") @db.Decimal(36, 18)
+  entryType     EntryType   @map("entry_type")
+  
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  wallet        Wallet      @relation(fields: [walletId], references: [id])
+
+  // Index for transaction history query
+  @@index([walletId, createdAt(sort: Desc)])
+  @@map("ledger_entries")
+}
+
+model ExternalTransfer {
+  id            String            @id @default(uuid())
+  userId        String            @map("user_id")
+  walletId      String            @map("wallet_id")
+  direction     TransferDirection
+  
+  address       String?
+  txHash        String?           @unique @map("tx_hash")
+  amount        Decimal           @db.Decimal(36, 18)
+  fee           Decimal           @default(0) @db.Decimal(36, 18)
+  
+  status        TransferStatus    @default(PENDING)
+  confirmations Int               @default(0)
+  createdAt     DateTime          @default(now()) @map("created_at")
+  confirmedAt   DateTime?         @map("confirmed_at")
+
+  // Relations
+  user          User              @relation(fields: [userId], references: [id])
+  wallet        Wallet            @relation(fields: [walletId], references: [id])
+
+  @@map("external_transfers")
+}
