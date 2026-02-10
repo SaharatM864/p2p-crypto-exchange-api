@@ -3,36 +3,42 @@ import { TradesService } from './trades.service';
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import type { User } from '@prisma/client';
+import { ApiAuthEndpoint } from '../common/decorators/api-auth-endpoint.decorator';
+import { ApiStandardResponse } from '../common/decorators/api-standard-response.decorator';
+import { TradeDto } from './dto/trade.dto';
 
 @ApiTags('Trades')
 @Controller('trades')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class TradesController {
   constructor(private readonly tradesService: TradesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create new trade (Taker)' })
+  @ApiAuthEndpoint('Create new trade (Taker)')
+  @ApiStandardResponse(TradeDto)
   create(@CurrentUser() user: User, @Body() dto: CreateTradeDto) {
     return this.tradesService.create(user.id, dto);
   }
 
   @Post(':id/pay')
-  @ApiOperation({ summary: 'Mark trade as PAID (Buyer only)' })
+  @ApiAuthEndpoint('Mark trade as PAID (Buyer only)')
+  @ApiStandardResponse(TradeDto)
   markPaid(@CurrentUser() user: User, @Param('id') id: string) {
     return this.tradesService.markPaid(user.id, id);
   }
 
   @Post(':id/release')
-  @ApiOperation({ summary: 'Release crypto (Seller only)' })
+  @ApiAuthEndpoint('Release crypto (Seller only)')
+  @ApiStandardResponse(TradeDto)
   release(@CurrentUser() user: User, @Param('id') id: string) {
     return this.tradesService.release(user.id, id);
   }
 
   @Post(':id/cancel')
-  @ApiOperation({ summary: 'Cancel trade' })
+  @ApiAuthEndpoint('Cancel trade')
+  @ApiStandardResponse(TradeDto)
   cancel(@CurrentUser() user: User, @Param('id') id: string) {
     return this.tradesService.cancel(user.id, id);
   }

@@ -2,7 +2,10 @@ import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiStandardResponse } from '../common/decorators/api-standard-response.decorator';
+import { UserDto } from './dto/user.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -11,8 +14,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register new user' })
-  @ApiResponse({ status: 201, description: 'User successfully created.' })
-  @ApiResponse({ status: 409, description: 'Email already exists.' })
+  @ApiStandardResponse(UserDto)
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -20,11 +22,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Login successful, returns JWT token.',
-  })
-  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
+  @ApiStandardResponse(LoginResponseDto)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
