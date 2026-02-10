@@ -89,6 +89,25 @@ export class OrdersService {
             lockedBalance: { increment: lockAmount },
           },
         });
+
+        // Audit Trail: Ledger Entry สำหรับการ Lock เงิน (Escrow)
+        const lockTx = await tx.transaction.create({
+          data: {
+            type: 'TRADE',
+            status: 'POSTED',
+            description: `Order escrow lock — ${dto.totalAmount} ${dto.cryptoCurrency}`,
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            transactionId: lockTx.id,
+            walletId: wallet.id,
+            amount: lockAmount.negated(),
+            balanceAfter: wallet.availableBalance.minus(lockAmount),
+            entryType: 'DEBIT',
+          },
+        });
       }
 
       // 3. Create Order

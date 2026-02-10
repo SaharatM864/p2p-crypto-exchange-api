@@ -83,19 +83,24 @@ export class TradesService {
   }
 
   async markPaid(userId: string, tradeId: string) {
-    const trade = await this.prisma.trade.findUnique({
-      where: { id: tradeId },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      // Pessimistic lock เพื่อป้องกัน race condition (pay + cancel พร้อมกัน)
+      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId}::uuid FOR UPDATE`;
 
-    if (!trade) throw new NotFoundException('Trade not found');
-    if (trade.buyerId !== userId)
-      throw new ForbiddenException('Only buyer can mark as paid');
-    if (trade.status !== 'PENDING_PAYMENT')
-      throw new BadRequestException('Invalid trade status');
+      const trade = await tx.trade.findUnique({
+        where: { id: tradeId },
+      });
 
-    return this.prisma.trade.update({
-      where: { id: tradeId },
-      data: { status: 'PAID' },
+      if (!trade) throw new NotFoundException('Trade not found');
+      if (trade.buyerId !== userId)
+        throw new ForbiddenException('Only buyer can mark as paid');
+      if (trade.status !== 'PENDING_PAYMENT')
+        throw new BadRequestException('Invalid trade status');
+
+      return tx.trade.update({
+        where: { id: tradeId },
+        data: { status: 'PAID' },
+      });
     });
   }
 
@@ -190,6 +195,18 @@ export class TradesService {
       const feeAmount = tradeAmount.mul(feeRate);
       const totalDeductFromSeller = tradeAmount.plus(feeAmount);
 
+      // Zero-Sum Validation (safety net)
+      // Debit(-totalDeductFromSeller) + Credit(+tradeAmount) + Credit(+feeAmount) ต้อง = 0
+      const ledgerSum = totalDeductFromSeller
+        .negated()
+        .plus(tradeAmount)
+        .plus(feeAmount);
+      if (!ledgerSum.equals(new Prisma.Decimal(0))) {
+        throw new Error(
+          `Zero-sum validation failed: sum=${ledgerSum.toString()}`,
+        );
+      }
+
       // 4. Update Balances
 
       // Deduct from Seller Locked (Amount + Fee)
@@ -267,34 +284,30 @@ export class TradesService {
 
   async cancel(userId: string, tradeId: string) {
     return this.prisma.$transaction(async (tx) => {
+      // Pessimistic lock เพื่อป้องกัน race condition (cancel + pay พร้อมกัน)
+      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId}::uuid FOR UPDATE`;
+
       const trade = await tx.trade.findUnique({
         where: { id: tradeId },
         include: { order: true },
       });
 
       if (!trade) throw new NotFoundException('Trade not found');
-      // Only allow cancel if not completed
       if (['COMPLETED', 'CANCELLED'].includes(trade.status)) {
         throw new BadRequestException('Cannot cancel finished trade');
       }
 
-      // Logic: Only Buyer can cancel if PENDING_PAYMENT
-      // Logic: Both can cancel in dispute? For simplicity: Buyer cancels or Admin cancels.
-      // Here: User cancellation
       if (trade.buyerId !== userId && trade.sellerId !== userId) {
         throw new ForbiddenException('Not authorized');
       }
 
-      // Restore Order Amount
-      // filledAmount -= tradeAmount
-      // Status check: if was COMPLETED, becomes OPEN/PARTIAL
+      // Lock order row เพื่อป้องกัน race condition กับการสร้าง trade ใหม่
+      await tx.$executeRaw`SELECT * FROM orders WHERE id = ${trade.orderId}::uuid FOR UPDATE`;
 
       const order = await tx.order.findUnique({ where: { id: trade.orderId } });
+      if (!order) throw new NotFoundException('Order not found');
 
-      if (!order) {
-        throw new NotFoundException('Order not found');
-      }
-
+      // Restore Order filledAmount
       const newFilled = order.filledAmount.minus(trade.cryptoAmount);
 
       await tx.order.update({
@@ -304,6 +317,65 @@ export class TradesService {
           status: newFilled.equals(0) ? 'OPEN' : 'PARTIAL',
         },
       });
+
+      // ถ้าเป็น SELL order: คืนเหรียญที่ lock ไว้กลับให้ seller
+      if (order.side === 'SELL') {
+        const feeRate = new Prisma.Decimal(TRADING_FEE_RATE);
+        const unlockAmount = trade.cryptoAmount.mul(
+          new Prisma.Decimal(1).plus(feeRate),
+        );
+
+        // หา seller wallet และ lock row
+        const sellerWalletRef = await tx.wallet.findUnique({
+          where: {
+            userId_currencyCode: {
+              userId: trade.sellerId,
+              currencyCode: order.cryptoCurrency,
+            },
+          },
+          select: { id: true },
+        });
+
+        if (!sellerWalletRef)
+          throw new BadRequestException('Seller wallet not found');
+
+        await tx.$executeRaw`SELECT * FROM wallets WHERE id = ${sellerWalletRef.id}::uuid FOR UPDATE`;
+
+        const sellerWallet = await tx.wallet.findUnique({
+          where: { id: sellerWalletRef.id },
+        });
+
+        if (!sellerWallet)
+          throw new BadRequestException('Seller wallet not found after lock');
+
+        // คืนเงิน: lockedBalance -> availableBalance
+        await tx.wallet.update({
+          where: { id: sellerWallet.id },
+          data: {
+            lockedBalance: { decrement: unlockAmount },
+            availableBalance: { increment: unlockAmount },
+          },
+        });
+
+        // Audit Trail: Ledger Entry สำหรับการปลดล็อค
+        const cancelTx = await tx.transaction.create({
+          data: {
+            type: 'TRADE',
+            status: 'POSTED',
+            description: `Trade ${trade.id} cancelled — unlock escrow`,
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            transactionId: cancelTx.id,
+            walletId: sellerWallet.id,
+            amount: unlockAmount,
+            balanceAfter: sellerWallet.availableBalance.plus(unlockAmount),
+            entryType: 'CREDIT',
+          },
+        });
+      }
 
       return tx.trade.update({
         where: { id: tradeId },

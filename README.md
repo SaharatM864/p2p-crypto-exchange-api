@@ -1,107 +1,124 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# P2P Crypto Exchange API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+ระบบตัวกลางแลกเปลี่ยน Cryptocurrencies แบบ Peer-to-Peer (P2P) พัฒนาด้วย **NestJS + Prisma + PostgreSQL**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+รองรับการซื้อ-ขาย BTC, ETH, XRP, DOGE ด้วยสกุลเงิน Fiat (THB, USD) พร้อมระบบ **Double-Entry Ledger** สำหรับบันทึกธุรกรรมและ **Pessimistic Locking** ป้องกัน Race Condition
 
-## Description
+## ER Diagram
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ดู [ER Diagram ฉบับเต็ม](docs/er-diagram.md) หรือดูภาพรวม:
 
-## Project setup
+![ER Diagram](docs/mermaid-diagram.png)
 
-```bash
-$ npm install
-```
+## Tech Stack
 
-## Compile and run the project
+| Layer     | Technology        |
+| --------- | ----------------- |
+| Runtime   | Node.js 20        |
+| Framework | NestJS 11         |
+| ORM       | Prisma 6          |
+| Database  | PostgreSQL 16     |
+| Auth      | JWT (Passport)    |
+| Hashing   | Argon2            |
+| Docs      | Swagger (OpenAPI) |
+| Container | Docker Compose    |
 
-```bash
-# development
-$ npm run start
+## Quick Start
 
-# watch mode
-$ npm run start:dev
+### Prerequisites
 
-# production mode
-$ npm run start:prod
-```
+- **Node.js** 18+ ([Download](https://nodejs.org/))
+- **Docker & Docker Compose** ([Download](https://www.docker.com/))
 
-## Run tests
+### ขั้นตอนรัน (3 คำสั่ง)
 
 ```bash
-# unit tests
-$ npm run test
+# 1. Start Database + Install Dependencies
+docker-compose up -d && npm install
 
-# e2e tests
-$ npm run test:e2e
+# 2. Migrate + Seed ข้อมูล
+npx prisma migrate dev && npx prisma db seed
 
-# test coverage
-$ npm run test:cov
+# 3. Start Server
+npm run start:dev
 ```
 
-## Deployment
+เมื่อสำเร็จ:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- **API Server**: http://localhost:3000
+- **Swagger UI**: http://localhost:3000/api/docs
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Demo Accounts
+
+| Email             | Password      | บทบาท                   |
+| ----------------- | ------------- | ----------------------- |
+| `admin@p2p.com`   | `password123` | Admin — มีเงินทุกสกุล   |
+| `buyer@demo.com`  | `password123` | ผู้ซื้อ — มี 50,000 THB |
+| `seller@demo.com` | `password123` | ผู้ขาย — มี 2.5 BTC     |
+| `fees@p2p.com`    | `password123` | System Fee Collector    |
+
+> **Demo Scenario**: มี Trade สถานะ `PAID` พร้อมให้ login เป็น `seller@demo.com` แล้วกด Release ได้เลย
+
+## API Documentation
+
+### วิธีที่ 1: Swagger UI (แนะนำ)
+
+เปิด http://localhost:3000/api/docs → กด **Authorize** → ใส่ Token จาก Login
+
+### วิธีที่ 2: Postman
+
+1. Import `postman/P2P-Crypto-Exchange-API.postman_collection.json`
+2. Import `postman/P2P-Crypto-Exchange-API.postman_environment.json`
+3. เลือก Environment → เริ่มยิง API ได้เลย
+
+## Flow การทำงานหลัก
+
+```
+1. Register + Login → ได้ JWT Token
+2. ดูกระเป๋าเงิน → GET /wallets/me
+3. ตั้งขาย BTC → POST /orders (side=SELL) → ระบบ Lock เหรียญ
+4. ผู้ซื้อตอบรับ → POST /trades → สร้าง Trade (PENDING_PAYMENT)
+5. ผู้ซื้อโอนเงิน → POST /trades/:id/pay → สถานะ PAID
+6. ผู้ขายปล่อยเหรียญ → POST /trades/:id/release → COMPLETED
+   → Ledger Entry: Seller -BTC, Buyer +BTC, System +Fee
+```
+
+## ฟีเจอร์หลัก
+
+- **P2P Trading**: ตั้งซื้อ-ขาย Crypto ด้วย Fiat พร้อม Escrow
+- **Double-Entry Ledger**: ใช้ระบบบัญชีคู่ ทุกธุรกรรมมี Debit/Credit
+- **Pessimistic Locking**: ป้องกัน Double Spending ด้วย `SELECT FOR UPDATE`
+- **Concurrency Safe**: มี E2E Test ยืนยัน Race Condition Protection
+- **Financial Precision**: ใช้ `DECIMAL(36,18)` ไม่มี Float
+
+## Testing
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Unit Tests
+npm run test
+
+# E2E Tests (รวม Concurrency Test)
+npm run test:e2e
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Project Structure
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```
+src/
+├── auth/        # สมัครสมาชิก / Login (JWT)
+├── orders/      # ตั้งซื้อ-ขาย (Maker)
+├── trades/      # จับคู่ + Release + Cancel (Taker)
+├── wallets/     # กระเป๋าเงิน
+├── prisma/      # Database Service
+└── common/      # DTO, Decorators, Guards, Filters
+```
 
 ## Security Notes
 
 ### Dependency Overrides
 
 - **js-yaml**: Forced to `^4.1.1` to resolve [GHSA-mh29-5h37-fv8m](https://github.com/advisories/GHSA-mh29-5h37-fv8m) vulnerability in `openapi-to-postmanv2`.
-- **transformers**: Removed as unused dependency.
 
-To update dependencies, ensure these security constraints are maintained.
+## License
+
+MIT

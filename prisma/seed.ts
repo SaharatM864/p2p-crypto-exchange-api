@@ -123,8 +123,8 @@ async function depositFunds(
   });
 
   // 3. สร้าง Ledger Entry (ขา Credit เข้ากระเป๋า)
-  // คำนวณยอดเงินใหม่
-  const newBalance = Number(wallet.availableBalance) + amount;
+  // คำนวณยอดเงินใหม่ (ใช้ Decimal เพื่อป้องกัน Floating Point Error)
+  const newBalance = wallet.availableBalance.plus(amountDecimal);
 
   await prisma.ledgerEntry.create({
     data: {
@@ -230,6 +230,62 @@ async function seedGoldSet() {
   });
   console.log(`   - Created Trader B: ${traderB.email}`);
   await depositFunds(traderB.id, 'BTC', 2.5); // มี 2.5 BTC
+
+  // 5. สร้าง Demo Scenario: Trade สถานะ PAID (พร้อมให้คนตรวจกด Release ได้เลย)
+  console.log('📦 กำลังสร้าง Demo Trade (สถานะ PAID)...');
+
+  const demoSellAmount = 0.5;
+  const demoPrice = 1500000; // 1.5M THB per BTC
+  const demoFeeRate = 0.001;
+  const demoLockAmount = demoSellAmount * (1 + demoFeeRate); // 0.5005 BTC
+
+  // Lock BTC ของ Trader B
+  const traderBWallet = await prisma.wallet.findUnique({
+    where: {
+      userId_currencyCode: { userId: traderB.id, currencyCode: 'BTC' },
+    },
+  });
+
+  if (traderBWallet) {
+    await prisma.wallet.update({
+      where: { id: traderBWallet.id },
+      data: {
+        availableBalance: { decrement: demoLockAmount },
+        lockedBalance: { increment: demoLockAmount },
+      },
+    });
+
+    const demoOrder = await prisma.order.create({
+      data: {
+        userId: traderB.id,
+        side: 'SELL',
+        cryptoCurrency: 'BTC',
+        fiatCurrency: 'THB',
+        price: demoPrice,
+        totalAmount: demoSellAmount,
+        filledAmount: demoSellAmount,
+        status: 'COMPLETED',
+        minLimit: 1000,
+        maxLimit: 750000,
+      },
+    });
+
+    await prisma.trade.create({
+      data: {
+        orderId: demoOrder.id,
+        buyerId: traderA.id,
+        sellerId: traderB.id,
+        cryptoAmount: demoSellAmount,
+        fiatAmount: demoSellAmount * demoPrice, // 750,000 THB
+        price: demoPrice,
+        status: 'PAID', // พร้อมให้ seller กด Release!
+      },
+    });
+
+    console.log('   - SELL Order: 0.5 BTC @ 1,500,000 THB');
+    console.log('   - Trade Status: PAID (รอ seller กด Release)');
+    console.log('   - Login: seller@demo.com → POST /trades/:id/release');
+  }
 }
 
 // ----------------------------------------------------------------------
