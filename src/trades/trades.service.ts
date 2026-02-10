@@ -18,7 +18,7 @@ export class TradesService {
     return this.prisma.$transaction(async (tx) => {
       // 1. Lock Order Row (Pessimistic Lock workaround via raw query)
       // This ensures no one else can modify this order while we are processing
-      await tx.$executeRaw`SELECT * FROM orders WHERE id = ${dto.orderId}::uuid FOR UPDATE`;
+      await tx.$executeRaw`SELECT * FROM orders WHERE id = ${dto.orderId} FOR UPDATE`;
 
       const order = await tx.order.findUnique({
         where: { id: dto.orderId },
@@ -85,7 +85,7 @@ export class TradesService {
   async markPaid(userId: string, tradeId: string) {
     return this.prisma.$transaction(async (tx) => {
       // Pessimistic lock เพื่อป้องกัน race condition (pay + cancel พร้อมกัน)
-      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId}::uuid FOR UPDATE`;
+      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId} FOR UPDATE`;
 
       const trade = await tx.trade.findUnique({
         where: { id: tradeId },
@@ -173,7 +173,7 @@ export class TradesService {
 
       // 2. EXECUTE PESSIMITIC LOCKS
       // Locking seller, buyer, and system fee wallet rows
-      await tx.$executeRaw`SELECT * FROM wallets WHERE id IN (${sellerWalletId}::uuid, ${buyerWalletId}::uuid, ${systemFeeWalletId}::uuid) FOR UPDATE`;
+      await tx.$executeRaw`SELECT * FROM wallets WHERE id IN (${sellerWalletId}, ${buyerWalletId}, ${systemFeeWalletId}) FOR UPDATE`;
 
       // 3. RE-READ Wallets after lock to get latest balances
       const sellerWallet = await tx.wallet.findUnique({
@@ -285,7 +285,7 @@ export class TradesService {
   async cancel(userId: string, tradeId: string) {
     return this.prisma.$transaction(async (tx) => {
       // Pessimistic lock เพื่อป้องกัน race condition (cancel + pay พร้อมกัน)
-      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId}::uuid FOR UPDATE`;
+      await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId} FOR UPDATE`;
 
       const trade = await tx.trade.findUnique({
         where: { id: tradeId },
@@ -302,7 +302,7 @@ export class TradesService {
       }
 
       // Lock order row เพื่อป้องกัน race condition กับการสร้าง trade ใหม่
-      await tx.$executeRaw`SELECT * FROM orders WHERE id = ${trade.orderId}::uuid FOR UPDATE`;
+      await tx.$executeRaw`SELECT * FROM orders WHERE id = ${trade.orderId} FOR UPDATE`;
 
       const order = await tx.order.findUnique({ where: { id: trade.orderId } });
       if (!order) throw new NotFoundException('Order not found');
@@ -339,7 +339,7 @@ export class TradesService {
         if (!sellerWalletRef)
           throw new BadRequestException('Seller wallet not found');
 
-        await tx.$executeRaw`SELECT * FROM wallets WHERE id = ${sellerWalletRef.id}::uuid FOR UPDATE`;
+        await tx.$executeRaw`SELECT * FROM wallets WHERE id = ${sellerWalletRef.id} FOR UPDATE`;
 
         const sellerWallet = await tx.wallet.findUnique({
           where: { id: sellerWalletRef.id },
