@@ -90,5 +90,8 @@
   "overrides": {
     "hono": "^4.11.9",
     "lodash": "^4.17.23"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
