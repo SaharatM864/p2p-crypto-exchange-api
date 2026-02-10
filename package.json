@@ -41,7 +41,6 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
-    "transformers": "^3.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -94,7 +93,10 @@
   },
   "overrides": {
     "hono": "^4.11.9",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "openapi-to-postmanv2": {
+      "js-yaml": "^4.1.1"
+    }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

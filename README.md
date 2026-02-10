@@ -96,3 +96,12 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Security Notes
+
+### Dependency Overrides
+
+- **js-yaml**: Forced to `^4.1.1` to resolve [GHSA-mh29-5h37-fv8m](https://github.com/advisories/GHSA-mh29-5h37-fv8m) vulnerability in `openapi-to-postmanv2`.
+- **transformers**: Removed as unused dependency.
+
+To update dependencies, ensure these security constraints are maintained.
