@@ -113,66 +113,104 @@ export class TradesService {
         throw new BadRequestException('Trade must be PAID first');
 
       // --- DOUBLE ENTRY LEDGER LOGIC ---
-
       // 1. Move Asset from Seller (Locked) -> Buyer (Available)
       // Note: In SELL Order, asset was ALREADY moved from Available -> Locked when Order created.
       // So here we move Locked -> Buyer.Available
 
-      // Retrieve Wallets (Locking involved)
+      // Retrieve System Fee Wallet First
+      const systemFeeUser = await tx.user.findUnique({
+        where: { email: 'fees@p2p.com' },
+      });
+
+      if (!systemFeeUser) throw new Error('System Fee User not found');
+
       const cryptoCode = trade.order.cryptoCurrency;
 
-      const sellerWallet = await tx.wallet.findUnique({
-        where: {
-          userId_currencyCode: {
-            userId: trade.sellerId,
-            currencyCode: cryptoCode,
+      // 1. Identify IDs for locking (Locking all 3 wallets involved)
+      const sellerWalletId = (
+        await tx.wallet.findUnique({
+          where: {
+            userId_currencyCode: {
+              userId: trade.sellerId,
+              currencyCode: cryptoCode,
+            },
           },
-        },
-      });
+          select: { id: true },
+        })
+      )?.id;
 
-      const buyerWallet = await tx.wallet.findUnique({
-        where: {
-          userId_currencyCode: {
-            userId: trade.buyerId,
-            currencyCode: cryptoCode,
+      const buyerWalletId = (
+        await tx.wallet.findUnique({
+          where: {
+            userId_currencyCode: {
+              userId: trade.buyerId,
+              currencyCode: cryptoCode,
+            },
           },
-        },
-      });
+          select: { id: true },
+        })
+      )?.id;
 
-      if (!sellerWallet || !buyerWallet)
+      const systemFeeWalletId = (
+        await tx.wallet.findUnique({
+          where: {
+            userId_currencyCode: {
+              userId: systemFeeUser.id,
+              currencyCode: cryptoCode,
+            },
+          },
+          select: { id: true },
+        })
+      )?.id;
+
+      if (!sellerWalletId || !buyerWalletId || !systemFeeWalletId)
         throw new BadRequestException('Wallets not found');
 
-      // Amount to transfer (Total trade amount)
-      // Fee calculation: Buyer receives (Amount - Fee) or Seller pays fee?
-      // Usually P2P: Taker pays fee if Taker is Buyer? checking logic...
-      // Standard: Fee is deducted from the crypto amount being transferred.
-      // Let's implement: Buyer gets (Amount * (1 - fee))
+      // 2. EXECUTE PESSIMITIC LOCKS
+      // Locking seller, buyer, and system fee wallet rows
+      await tx.$executeRaw`SELECT * FROM wallets WHERE id IN (${sellerWalletId}::uuid, ${buyerWalletId}::uuid, ${systemFeeWalletId}::uuid) FOR UPDATE`;
 
-      // Wait, in Order creation we locked (Amount * (1+Fee)).
-      // So Seller already paid/locked the fee.
-      // Correct Logic:
-      //   Seller Locked decreases by (Amount + Fee)
-      //   Buyer Available increases by Amount
-      //   System Fee Wallet increases by Fee (Ignored for now / or burned)
+      // 3. RE-READ Wallets after lock to get latest balances
+      const sellerWallet = await tx.wallet.findUnique({
+        where: { id: sellerWalletId },
+      });
+      const buyerWallet = await tx.wallet.findUnique({
+        where: { id: buyerWalletId },
+      });
+      const systemFeeWallet = await tx.wallet.findUnique({
+        where: { id: systemFeeWalletId },
+      });
 
+      if (!sellerWallet || !buyerWallet || !systemFeeWallet)
+        throw new BadRequestException('Wallets not found after lock');
+
+      // Calculate logic
       const tradeAmount = trade.cryptoAmount;
       const feeRate = new Prisma.Decimal(TRADING_FEE_RATE);
       const feeAmount = tradeAmount.mul(feeRate);
       const totalDeductFromSeller = tradeAmount.plus(feeAmount);
 
-      // 1. Deduct from Seller Locked
+      // 4. Update Balances
+
+      // Deduct from Seller Locked (Amount + Fee)
       await tx.wallet.update({
         where: { id: sellerWallet.id },
         data: { lockedBalance: { decrement: totalDeductFromSeller } },
       });
 
-      // 2. Add to Buyer Available
+      // Add to Buyer Available (Amount)
       await tx.wallet.update({
         where: { id: buyerWallet.id },
         data: { availableBalance: { increment: tradeAmount } },
       });
 
-      // 3. Create Transaction Record
+      // Add Fee to System Wallet
+      await tx.wallet.update({
+        where: { id: systemFeeWallet.id },
+        data: { availableBalance: { increment: feeAmount } },
+      });
+
+      // 5. Create Transaction Record
       const transaction = await tx.transaction.create({
         data: {
           type: 'TRADE',
@@ -181,25 +219,37 @@ export class TradesService {
         },
       });
 
-      // 4. Create Ledger Entries
-      // Seller Debit (Liability decrease)
+      // 6. Create Ledger Entries
+
+      // 6.1 Seller Debit (Liability decrease) - Full Amount + Fee
       await tx.ledgerEntry.create({
         data: {
           transactionId: transaction.id,
           walletId: sellerWallet.id,
           amount: totalDeductFromSeller.negated(),
-          balanceAfter: sellerWallet.lockedBalance.minus(totalDeductFromSeller), // Approximate
+          balanceAfter: sellerWallet.lockedBalance.minus(totalDeductFromSeller),
           entryType: 'DEBIT',
         },
       });
 
-      // Buyer Credit (Liability increase from exchange perspective)
+      // 6.2 Buyer Credit (Liability increase) - Trade Amount
       await tx.ledgerEntry.create({
         data: {
           transactionId: transaction.id,
           walletId: buyerWallet.id,
           amount: tradeAmount,
           balanceAfter: buyerWallet.availableBalance.plus(tradeAmount),
+          entryType: 'CREDIT',
+        },
+      });
+
+      // 6.3 System Fee Credit (Liability increase) - Fee Amount
+      await tx.ledgerEntry.create({
+        data: {
+          transactionId: transaction.id,
+          walletId: systemFeeWallet.id,
+          amount: feeAmount,
+          balanceAfter: systemFeeWallet.availableBalance.plus(feeAmount),
           entryType: 'CREDIT',
         },
       });

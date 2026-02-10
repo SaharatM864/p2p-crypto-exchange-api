@@ -177,6 +177,24 @@ async function seedGoldSet() {
   await depositFunds(admin.id, 'BTC', 10);
   await depositFunds(admin.id, 'USDT', 1_000_000);
 
+  // 2.1 สร้าง System Fee User (สำหรับเก็บค่าธรรมเนียม)
+  const systemFeeUser = await prisma.user.create({
+    data: {
+      email: 'fees@p2p.com',
+      passwordHash: SHARED_PASSWORD_HASH,
+      fullName: 'System Fee Collector',
+      status: UserStatus.ACTIVE,
+      wallets: {
+        create: [
+          { currencyCode: 'THB' },
+          { currencyCode: 'BTC' },
+          { currencyCode: 'USDT' },
+        ],
+      },
+    },
+  });
+  console.log(`   - Created System Fee User: ${systemFeeUser.email}`);
+
   // 3. สร้าง Demo Trader A (Buyer)
   const traderA = await prisma.user.create({
     data: {

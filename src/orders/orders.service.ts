@@ -43,19 +43,34 @@ export class OrdersService {
 
         // ค้นหาและตรวจสอบยอดเงิน
         /* 
-           NOTE: Prisma Client JS does not fully support "SELECT FOR UPDATE" natively yet in clean API.
-           Common workaround is raw query OR ensuring atomic updates.
-           Here we use atomic update with condition (Optimistic Concurrency Control style within Transaction)
-           which is effectively safe because of Transaction isolation.
+           NOTE: Implemented Pessimistic Locking using raw query.
+           This locks the wallet row until the transaction commits, preventing race conditions.
         */
 
-        const wallet = await tx.wallet.findUnique({
+        // 1. Lock the wallet row first
+        // We need the wallet ID, but we only have userId and currencyCode.
+        // So we might need to find IT first (cheap read) then lock by ID,
+        // OR lock the user row to serialize all user actions.
+        // Locking Wallet by ID is better for granularity.
+
+        const walletToLock = await tx.wallet.findUnique({
           where: {
             userId_currencyCode: {
               userId,
               currencyCode: dto.cryptoCurrency,
             },
           },
+          select: { id: true },
+        });
+
+        if (!walletToLock) throw new BadRequestException('Wallet not found');
+
+        // Execute Raw SQL to lock specific row
+        await tx.$executeRaw`SELECT * FROM wallets WHERE id = ${walletToLock.id} FOR UPDATE`;
+
+        // 2. Read the latest state AFTER lock
+        const wallet = await tx.wallet.findUnique({
+          where: { id: walletToLock.id },
         });
 
         if (!wallet) throw new BadRequestException('Wallet not found');
