@@ -19,6 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "postman:export": "ts-node scripts/generate-postman.ts",
     "upgrade": "ncu -i"
   },
   "dependencies": {
@@ -61,6 +62,7 @@
     "globals": "^17.3.0",
     "jest": "^30.2.0",
     "npm-check-updates": "^19.3.2",
+    "openapi-to-postmanv2": "^6.0.0",
     "prettier": "^3.8.1",
     "prisma": "6.3.1",
     "rimraf": "^6.1.2",

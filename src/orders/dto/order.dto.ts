@@ -13,37 +13,37 @@ export enum OrderStatus {
 }
 
 export class OrderDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-order-id' })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-user-id' })
   userId!: string;
 
-  @ApiProperty({ enum: OrderSide, enumName: 'OrderSide' })
+  @ApiProperty({ enum: OrderSide, enumName: 'OrderSide', example: 'SELL' })
   side!: OrderSide;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'BTC' })
   cryptoCurrency!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'THB' })
   fiatCurrency!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1500000.00' })
   price!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1.5' })
   totalAmount!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '0.0' })
   filledAmount!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '100.00' })
   minLimit!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1000000.00' })
   maxLimit!: string;
 
-  @ApiProperty({ enum: OrderStatus, enumName: 'OrderStatus' })
+  @ApiProperty({ enum: OrderStatus, enumName: 'OrderStatus', example: 'OPEN' })
   status!: OrderStatus;
 
   @ApiProperty()

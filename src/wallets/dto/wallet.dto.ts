@@ -1,27 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-wallet-id' })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'BTC' })
   currencyCode!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Bitcoin' })
   currencyName!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CRYPTO' })
   currencyType!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1.5' })
   availableBalance!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '0.5' })
   lockedBalance!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '0.0' })
   pendingBalance!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2.0' })
   totalBalance!: string;
 }

@@ -9,28 +9,32 @@ export enum TradeStatus {
 }
 
 export class TradeDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-trade-id' })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-order-id' })
   orderId!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-buyer-id' })
   buyerId!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid-seller-id' })
   sellerId!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '0.5' })
   cryptoAmount!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '750000.00' })
   fiatAmount!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1500000.00' })
   price!: string;
 
-  @ApiProperty({ enum: TradeStatus, enumName: 'TradeStatus' })
+  @ApiProperty({
+    enum: TradeStatus,
+    enumName: 'TradeStatus',
+    example: 'PENDING_PAYMENT',
+  })
   status!: TradeStatus;
 
   @ApiProperty()
