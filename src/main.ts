@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,7 +27,11 @@ async function bootstrap() {
     }),
   );
 
-  // 4. API Versioning
+  // 4. Global Interceptors & Filters (Standardized Response)
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // 5. API Versioning
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
