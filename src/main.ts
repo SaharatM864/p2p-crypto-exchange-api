@@ -40,7 +40,9 @@ async function bootstrap() {
   // 5. API Documentation (Swagger)
   const config = new DocumentBuilder()
     .setTitle('P2P Crypto Exchange API')
-    .setDescription('The P2P Crypto Exchange API documentation')
+    .setDescription(
+      'เอกสาร API สำหรับระบบแลกเปลี่ยน Crypto แบบ P2P รองรับการสร้างคำสั่งซื้อ/ขาย การเทรด การจัดการกระเป๋าเงิน และระบบบัญชีแบบ Double-Entry Ledger',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

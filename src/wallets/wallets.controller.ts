@@ -15,7 +15,10 @@ export class WalletsController {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Get()
-  @ApiAuthEndpoint('Get my wallets balance')
+  @ApiAuthEndpoint(
+    'ดูยอดเงินในกระเป๋าของฉัน',
+    'แสดงรายการ Wallet ทั้งหมดของผู้ใช้ปัจจุบัน พร้อมยอดคงเหลือแยกตาม Available, Locked, Pending และ Total เรียงตามรหัสสกุลเงิน (A-Z)',
+  )
   @ApiStandardResponse(WalletDto, { isArray: true })
   getMyWallets(@CurrentUser() user: User) {
     return this.walletsService.getMyWallets(user.id);

@@ -17,34 +17,22 @@ export class OrdersController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiAuthEndpoint('Create new buy/sell order (Maker)')
+  @ApiAuthEndpoint(
+    'สร้างคำสั่งซื้อ/ขาย (Maker)',
+    'สร้างคำสั่งประกาศซื้อหรือขาย Crypto (BUY/SELL) กรณีสร้าง SELL Order ระบบจะล็อคยอดเหรียญ + ค่าธรรมเนียม 0.1% จาก Wallet ของผู้ประกาศทันที (Escrow) หากยอดเงินไม่เพียงพอจะส่ง Error กลับ',
+  )
   @ApiStandardResponse(OrderDto)
   create(@CurrentUser() user: User, @Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(user.id, createOrderDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all open orders' })
-  @ApiStandardResponse(OrderDto) // In reality this returns an array, so usually we'd use ApiPaginatedResponse or ApiStandardResponse([OrderDto]) logic?
-  // My generic wrapper supports data: T. If T is OrderDto[], it works if I pass [OrderDto] to ValidatedResponse?
-  // No, the decorator is `ApiStandardResponse(Model)`. It puts `data: Model`.
-  // If I want array, I should use `ApiPaginatedResponse` OR make `ApiStandardResponse` support array.
-  // The current `ApiStandardResponse` does `data: { $ref: getSchemaPath(model) }`.
-  // If I want array, I need a different decorator or modify it to handle isArray option.
-  // Ideally, list endpoints should be paginated and use `ApiPaginatedResponse`.
-  // But `findAll` here returns plain array.
-  // IMPORTANT: The user mentioned `ApiOkResponsePaginated`.
-  // I implemented `ApiPaginatedResponse`.
-  // If `findAll` is NOT paginated, I should probably use `ApiStandardResponse` but tell it it's an array?
-  // Current implementation of `ApiStandardResponse` does NOT support array easily unless I overload it.
-  // Let's assume `findAll` returns array and use `ApiStandardResponse` but I need to handle the array schema.
-  // Actually, I should use `ApiStandardResponse` for single, and maybe create `ApiStandardListResponse` for array if not paginated.
-  // OR simply, I will wrap the return in `{ data: [...] }` manually in the service or interceptor?
-  // The global interceptor `TransformInterceptor` likely wraps everything in `data`.
-  // So if `findAll` returns `Order[]`, the result is `{ statusCode, message, data: Order[] }`.
-  // Does `ApiStandardResponse(OrderDto)` describe `data: OrderDto` or `data: OrderDto[]`?
-  // It describes `data: OrderDto`.
-  // To support array, I should add `isArray` option to `ApiStandardResponse`.
+  @ApiOperation({
+    summary: 'ดูรายการคำสั่งซื้อ/ขายที่เปิดอยู่',
+    description:
+      'เปิดสาธารณะ (ไม่ต้องยืนยันตัวตน) — แสดงรายการ Order ทั้งหมดที่มีสถานะ OPEN หรือ PARTIAL เรียงจากล่าสุดก่อน ใช้สำหรับให้ Taker เลือก Order ที่ต้องการเทรด',
+  })
+  @ApiStandardResponse(OrderDto)
   findAll() {
     return this.ordersService.findAll();
   }

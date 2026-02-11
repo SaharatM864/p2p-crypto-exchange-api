@@ -13,7 +13,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiOperation({ summary: 'Register new user' })
+  @ApiOperation({
+    summary: 'สมัครสมาชิกใหม่',
+    description:
+      'สร้างบัญชีผู้ใช้ใหม่ด้วยอีเมลและรหัสผ่าน ระบบจะสร้างกระเป๋าเงิน (Wallet) ให้อัตโนมัติสำหรับทุกสกุลเงินที่รองรับ (BTC, ETH, USDT, THB, USD) ไม่ต้องยืนยันตัวตน (Auth) ในการเรียกใช้',
+  })
   @ApiStandardResponse(UserDto)
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
@@ -21,7 +25,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({
+    summary: 'เข้าสู่ระบบ',
+    description:
+      'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน เมื่อสำเร็จจะได้รับ JWT Token สำหรับใช้ยืนยันตัวตนใน API อื่นๆ ไม่ต้องยืนยันตัวตน (Auth) ในการเรียกใช้',
+  })
   @ApiStandardResponse(LoginResponseDto)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

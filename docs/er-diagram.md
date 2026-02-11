@@ -336,7 +336,7 @@ erDiagram
 
 ---
 
-## หมายเหตุสำหรับนักพัฒนา
+## หมายเหตุ
 
 1. **ห้าม DELETE/UPDATE ใน ledger_entries** - ใช้ Reversal Entry แทน
 2. **ใช้ Transaction (BEGIN...COMMIT)** สำหรับทุกการเปลี่ยนแปลงยอดเงิน
