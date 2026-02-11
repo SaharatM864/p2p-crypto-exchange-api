@@ -16,8 +16,6 @@ export class TradesService {
 
   async create(userId: string, dto: CreateTradeDto) {
     return this.prisma.$transaction(async (tx) => {
-      // 1. Lock Order Row (Pessimistic Lock workaround via raw query)
-      // This ensures no one else can modify this order while we are processing
       await tx.$executeRaw`SELECT * FROM orders WHERE id = ${dto.orderId} FOR UPDATE`;
 
       const order = await tx.order.findUnique({
@@ -35,7 +33,6 @@ export class TradesService {
         throw new ConflictException('Cannot trade with your own order');
       }
 
-      // 2. Validate Amount
       const tradeAmount = new Prisma.Decimal(dto.amount);
       const remainingAmount = order.totalAmount.minus(order.filledAmount);
 
@@ -43,10 +40,7 @@ export class TradesService {
         throw new BadRequestException('Insufficient amount in order');
       }
 
-      // 3. Create Trade
       const isBuyOrder = order.side === 'BUY';
-      // If Order is SELL, Maker is Seller, Taker (userId) is Buyer
-      // If Order is BUY, Maker is Buyer, Taker (userId) is Seller
 
       const buyerId = isBuyOrder ? order.userId : userId;
       const sellerId = isBuyOrder ? userId : order.userId;
@@ -65,8 +59,6 @@ export class TradesService {
         },
       });
 
-      // 4. Update Order Filled Amount
-      // Note logic: We do NOT deduct totalAmount, we track filledAmount
       const newFilled = order.filledAmount.plus(tradeAmount);
       const isCompleted = newFilled.equals(order.totalAmount);
 
@@ -84,7 +76,6 @@ export class TradesService {
 
   async markPaid(userId: string, tradeId: string) {
     return this.prisma.$transaction(async (tx) => {
-      // Pessimistic lock เพื่อป้องกัน race condition (pay + cancel พร้อมกัน)
       await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId} FOR UPDATE`;
 
       const trade = await tx.trade.findUnique({
@@ -117,12 +108,6 @@ export class TradesService {
       if (trade.status !== 'PAID')
         throw new BadRequestException('Trade must be PAID first');
 
-      // --- DOUBLE ENTRY LEDGER LOGIC ---
-      // 1. Move Asset from Seller (Locked) -> Buyer (Available)
-      // Note: In SELL Order, asset was ALREADY moved from Available -> Locked when Order created.
-      // So here we move Locked -> Buyer.Available
-
-      // Retrieve System Fee Wallet First
       const systemFeeUser = await tx.user.findUnique({
         where: { email: 'fees@p2p.com' },
       });
@@ -131,7 +116,6 @@ export class TradesService {
 
       const cryptoCode = trade.order.cryptoCurrency;
 
-      // 1. Identify IDs for locking (Locking all 3 wallets involved)
       const sellerWalletId = (
         await tx.wallet.findUnique({
           where: {
@@ -171,11 +155,8 @@ export class TradesService {
       if (!sellerWalletId || !buyerWalletId || !systemFeeWalletId)
         throw new BadRequestException('Wallets not found');
 
-      // 2. EXECUTE PESSIMITIC LOCKS
-      // Locking seller, buyer, and system fee wallet rows
       await tx.$executeRaw`SELECT * FROM wallets WHERE id IN (${sellerWalletId}, ${buyerWalletId}, ${systemFeeWalletId}) FOR UPDATE`;
 
-      // 3. RE-READ Wallets after lock to get latest balances
       const sellerWallet = await tx.wallet.findUnique({
         where: { id: sellerWalletId },
       });
@@ -195,8 +176,6 @@ export class TradesService {
       const feeAmount = tradeAmount.mul(feeRate);
       const totalDeductFromSeller = tradeAmount.plus(feeAmount);
 
-      // Zero-Sum Validation (safety net)
-      // Debit(-totalDeductFromSeller) + Credit(+tradeAmount) + Credit(+feeAmount) ต้อง = 0
       const ledgerSum = totalDeductFromSeller
         .negated()
         .plus(tradeAmount)
@@ -207,27 +186,21 @@ export class TradesService {
         );
       }
 
-      // 4. Update Balances
-
-      // Deduct from Seller Locked (Amount + Fee)
       await tx.wallet.update({
         where: { id: sellerWallet.id },
         data: { lockedBalance: { decrement: totalDeductFromSeller } },
       });
 
-      // Add to Buyer Available (Amount)
       await tx.wallet.update({
         where: { id: buyerWallet.id },
         data: { availableBalance: { increment: tradeAmount } },
       });
 
-      // Add Fee to System Wallet
       await tx.wallet.update({
         where: { id: systemFeeWallet.id },
         data: { availableBalance: { increment: feeAmount } },
       });
 
-      // 5. Create Transaction Record
       const transaction = await tx.transaction.create({
         data: {
           type: 'TRADE',
@@ -236,9 +209,6 @@ export class TradesService {
         },
       });
 
-      // 6. Create Ledger Entries
-
-      // 6.1 Seller Debit (Liability decrease) - Full Amount + Fee
       await tx.ledgerEntry.create({
         data: {
           transactionId: transaction.id,
@@ -249,7 +219,6 @@ export class TradesService {
         },
       });
 
-      // 6.2 Buyer Credit (Liability increase) - Trade Amount
       await tx.ledgerEntry.create({
         data: {
           transactionId: transaction.id,
@@ -260,7 +229,6 @@ export class TradesService {
         },
       });
 
-      // 6.3 System Fee Credit (Liability increase) - Fee Amount
       await tx.ledgerEntry.create({
         data: {
           transactionId: transaction.id,
@@ -271,7 +239,6 @@ export class TradesService {
         },
       });
 
-      // Update Trade Status
       return tx.trade.update({
         where: { id: tradeId },
         data: {
@@ -284,7 +251,6 @@ export class TradesService {
 
   async cancel(userId: string, tradeId: string) {
     return this.prisma.$transaction(async (tx) => {
-      // Pessimistic lock เพื่อป้องกัน race condition (cancel + pay พร้อมกัน)
       await tx.$executeRaw`SELECT * FROM trades WHERE id = ${tradeId} FOR UPDATE`;
 
       const trade = await tx.trade.findUnique({
@@ -301,13 +267,11 @@ export class TradesService {
         throw new ForbiddenException('Not authorized');
       }
 
-      // Lock order row เพื่อป้องกัน race condition กับการสร้าง trade ใหม่
       await tx.$executeRaw`SELECT * FROM orders WHERE id = ${trade.orderId} FOR UPDATE`;
 
       const order = await tx.order.findUnique({ where: { id: trade.orderId } });
       if (!order) throw new NotFoundException('Order not found');
 
-      // Restore Order filledAmount
       const newFilled = order.filledAmount.minus(trade.cryptoAmount);
 
       await tx.order.update({
@@ -318,14 +282,12 @@ export class TradesService {
         },
       });
 
-      // ถ้าเป็น SELL order: คืนเหรียญที่ lock ไว้กลับให้ seller
       if (order.side === 'SELL') {
         const feeRate = new Prisma.Decimal(TRADING_FEE_RATE);
         const unlockAmount = trade.cryptoAmount.mul(
           new Prisma.Decimal(1).plus(feeRate),
         );
 
-        // หา seller wallet และ lock row
         const sellerWalletRef = await tx.wallet.findUnique({
           where: {
             userId_currencyCode: {
@@ -348,7 +310,6 @@ export class TradesService {
         if (!sellerWallet)
           throw new BadRequestException('Seller wallet not found after lock');
 
-        // คืนเงิน: lockedBalance -> availableBalance
         await tx.wallet.update({
           where: { id: sellerWallet.id },
           data: {
@@ -357,7 +318,6 @@ export class TradesService {
           },
         });
 
-        // Audit Trail: Ledger Entry สำหรับการปลดล็อค
         const cancelTx = await tx.transaction.create({
           data: {
             type: 'TRADE',
@@ -395,7 +355,6 @@ export class TradesService {
 
     if (!trade) throw new NotFoundException('Trade not found');
 
-    // Allow only buyer or seller to view details
     if (trade.buyerId !== userId && trade.sellerId !== userId) {
       throw new ForbiddenException('Not authorized to view this trade');
     }

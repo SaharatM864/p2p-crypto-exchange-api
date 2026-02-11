@@ -19,7 +19,6 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    // 1. Check if email exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
@@ -28,15 +27,9 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    // 2. Hash password
     const passwordHash = await argon2.hash(registerDto.password);
 
-    // 3. Create user + wallets in transaction
-    // Default currencies to create wallets for
     const defaultCurrencies = DEFAULT_CURRENCIES;
-
-    // Verify currencies exist first to avoid errors (optional but good practice)
-    // For this exam, we assume seed data is there.
 
     try {
       const user = await this.prisma.user.create({
@@ -44,7 +37,7 @@ export class AuthService {
           email: registerDto.email,
           passwordHash,
           fullName: registerDto.fullName,
-          status: 'ACTIVE', // Auto activate for demo
+          status: 'ACTIVE',
           wallets: {
             create: defaultCurrencies.map((code) => ({
               currencyCode: code,
@@ -56,14 +49,10 @@ export class AuthService {
         },
       });
 
-      // Exclude password hash from response
-      // Exclude password hash from response
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash: _ph, ...result } = user;
       return result;
     } catch {
-      // Handle case where currency might not exist if seed didn't run
-      // causing FK constraint error on wallet creation
       throw new BadRequestException(
         'Failed to register user. System might not be initialized properly.',
       );
@@ -71,7 +60,6 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    // 1. Find user
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
     });
@@ -80,7 +68,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // 2. Verify password
     const isPasswordValid = await argon2.verify(
       user.passwordHash,
       loginDto.password,
@@ -90,7 +77,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // 3. Generate JWT
     const payload = { sub: user.id, email: user.email };
 
     return {

@@ -9,16 +9,13 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. Security Headers (Best Practice)
   app.use(helmet());
 
-  // 2. Enable CORS
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
     credentials: true,
   });
 
-  // 3. Global Validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -27,17 +24,14 @@ async function bootstrap() {
     }),
   );
 
-  // 4. Global Interceptors & Filters (Standardized Response)
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // 5. API Versioning
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
 
-  // 5. API Documentation (Swagger)
   const config = new DocumentBuilder()
     .setTitle('P2P Crypto Exchange API')
     .setDescription(
