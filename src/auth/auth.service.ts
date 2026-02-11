@@ -9,6 +9,7 @@ import { RegisterDto } from './dto/register.dto';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { DEFAULT_CURRENCIES } from '../common/constants/currency.constants';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +33,7 @@ export class AuthService {
 
     // 3. Create user + wallets in transaction
     // Default currencies to create wallets for
-    const defaultCurrencies = ['BTC', 'ETH', 'USDT', 'THB', 'USD'];
+    const defaultCurrencies = DEFAULT_CURRENCIES;
 
     // Verify currencies exist first to avoid errors (optional but good practice)
     // For this exam, we assume seed data is there.

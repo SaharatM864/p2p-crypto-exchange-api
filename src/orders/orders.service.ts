@@ -68,7 +68,10 @@ export class OrdersService {
         // Execute Raw SQL to lock specific row
         // Execute Raw SQL to lock specific row
         // Fix: Do not cast to UUID as ID is text
-        await tx.$executeRaw`SELECT * FROM wallets WHERE id = ${walletToLock.id} FOR UPDATE`;
+        // Execute Raw SQL to lock specific row
+        await tx.$executeRaw(
+          Prisma.sql`SELECT * FROM wallets WHERE id = ${walletToLock.id} FOR UPDATE`,
+        );
 
         // 2. Read the latest state AFTER lock
         const wallet = await tx.wallet.findUnique({
