@@ -121,7 +121,3 @@ src/
 ### Dependency Overrides
 
 - **js-yaml**: Forced to `^4.1.1` to resolve [GHSA-mh29-5h37-fv8m](https://github.com/advisories/GHSA-mh29-5h37-fv8m) vulnerability in `openapi-to-postmanv2`.
-
-## License
-
-MIT
