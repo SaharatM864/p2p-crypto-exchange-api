@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { AppModule } from '../src/app.module';
+import { VersioningType } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -46,6 +47,12 @@ interface OpenApiNode {
 
 async function generatePostmanCollection() {
   const app = await NestFactory.create(AppModule, { logger: false });
+
+  // Enable versioning to match main.ts
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
   const config = new DocumentBuilder()
     .setTitle('P2P Crypto Exchange API')

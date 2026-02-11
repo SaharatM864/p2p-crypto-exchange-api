@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
 
 export class BaseResponseDto<T> {
   @ApiProperty({ example: 200 })
@@ -7,5 +7,6 @@ export class BaseResponseDto<T> {
   @ApiProperty({ example: 'Success' })
   message!: string;
 
+  @ApiHideProperty()
   data!: T;
 }

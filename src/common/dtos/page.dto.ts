@@ -1,8 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
 import { PageMetaDto } from './page-meta.dto';
 
 export class PageDto<T> {
-  @ApiProperty({ isArray: true })
+  @ApiHideProperty()
   readonly data: T[];
 
   @ApiProperty({ type: () => PageMetaDto })

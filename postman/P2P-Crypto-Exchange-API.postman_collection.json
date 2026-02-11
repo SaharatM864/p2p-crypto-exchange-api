@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "66357ff8-b960-4235-8c8c-e3b24ef5bda7",
+      "id": "df99f039-7635-4722-abdd-ae887fd98b89",
       "name": "App",
       "description": {
         "content": "",
@@ -9,14 +9,14 @@
       },
       "item": [
         {
-          "id": "7be47b85-c1d0-40f0-8a22-c0a2a1afadea",
-          "name": "App Controller get Hello",
+          "id": "72bda7e1-8e49-4a1c-acf1-6eab8867583c",
+          "name": "App Controller get Hello v1",
           "request": {
-            "name": "App Controller get Hello",
+            "name": "App Controller get Hello v1",
             "description": {},
             "url": {
               "path": [
-                ""
+                "v1"
               ],
               "host": [
                 "{{baseUrl}}"
@@ -29,11 +29,11 @@
           },
           "response": [
             {
-              "id": "5255b082-55e2-479a-a7d7-f39ca3802941",
+              "id": "95328005-3656-46e3-9d56-3f32af2025a5",
               "originalRequest": {
                 "url": {
                   "path": [
-                    ""
+                    "v1"
                   ],
                   "host": [
                     "{{baseUrl}}"
@@ -66,7 +66,7 @@
       "event": []
     },
     {
-      "id": "884b84eb-819c-4805-bc37-fb227f81cff5",
+      "id": "d8e18025-86e6-43df-8285-74c52f23c7b6",
       "name": "Auth",
       "description": {
         "content": "",
@@ -74,13 +74,14 @@
       },
       "item": [
         {
-          "id": "dde9df70-9e3a-4d11-864f-48b7e8ba06b2",
+          "id": "765ee3bf-86da-46ac-b47e-602208fe5d20",
           "name": "Register new user",
           "request": {
             "name": "Register new user",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "auth",
                 "register"
               ],
@@ -114,10 +115,11 @@
           },
           "response": [
             {
-              "id": "5635406e-8caa-4d9b-b087-36843885bc99",
+              "id": "859aa709-5313-4ba3-b9a8-76b2a091a43b",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "auth",
                     "register"
                   ],
@@ -152,7 +154,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-user-id\",\n    \"email\": \"user@example.com\",\n    \"fullName\": \"John Doe\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"1972-11-25T01:43:32.559Z\",\n    \"updatedAt\": \"2022-12-08T09:45:52.477Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-user-id\",\n    \"email\": \"user@example.com\",\n    \"fullName\": \"John Doe\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"1992-06-09T14:12:59.913Z\",\n    \"updatedAt\": \"1973-10-10T03:32:25.957Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             }
@@ -163,13 +165,14 @@
           }
         },
         {
-          "id": "941e7c3c-b4a2-45f6-a6b5-8564b237cc09",
+          "id": "a14870d7-2d8f-4491-9719-63eb2ee7bd32",
           "name": "Login user",
           "request": {
             "name": "Login user",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "auth",
                 "login"
               ],
@@ -203,10 +206,11 @@
           },
           "response": [
             {
-              "id": "55411af8-e189-44f2-8514-7d0f90d1f0d9",
+              "id": "940894da-af91-4d53-8616-a77dc15f4cc7",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "auth",
                     "login"
                   ],
@@ -241,7 +245,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"access_token\": \"eyJh...\",\n    \"user\": {\n      \"id\": \"uuid-user-id\",\n      \"email\": \"user@example.com\",\n      \"fullName\": \"John Doe\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"1962-03-15T10:39:24.646Z\",\n      \"updatedAt\": \"1950-07-19T16:22:57.471Z\"\n    }\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"access_token\": \"eyJh...\",\n    \"user\": {\n      \"id\": \"uuid-user-id\",\n      \"email\": \"user@example.com\",\n      \"fullName\": \"John Doe\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"1979-03-13T16:36:04.102Z\",\n      \"updatedAt\": \"2009-07-15T17:18:06.703Z\"\n    }\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             }
@@ -255,7 +259,7 @@
       "event": []
     },
     {
-      "id": "6b824493-79cf-4fa4-80ae-0dfdf09d8d2c",
+      "id": "ce283d38-b269-4c0d-9c42-b6aec7c609bd",
       "name": "Wallets",
       "description": {
         "content": "",
@@ -263,13 +267,14 @@
       },
       "item": [
         {
-          "id": "53b458a2-2cf0-459d-aaaa-b7ca8e6647ac",
+          "id": "2ad9bd66-532c-4d92-baf9-7cdc103ac28d",
           "name": "Get my wallets balance",
           "request": {
             "name": "Get my wallets balance",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "wallets"
               ],
               "host": [
@@ -297,10 +302,11 @@
           },
           "response": [
             {
-              "id": "d57a4ee5-65cd-488b-ba23-3b8391a8f3b6",
+              "id": "7efaae2a-ee1e-4f7a-bd12-b389a50f5f5b",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "wallets"
                   ],
                   "host": [
@@ -339,11 +345,12 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "d8002abb-88b0-4245-87f2-d5c279d3fe6c",
+              "id": "73a7b4d9-1c0a-42fb-a9e9-89a1639eb081",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "wallets"
                   ],
                   "host": [
@@ -378,11 +385,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "addda89e-6012-4e55-bd9c-4e37714aeda1",
+              "id": "9ce824e7-6b37-4206-a2c6-6ceaf4125421",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "wallets"
                   ],
                   "host": [
@@ -417,11 +425,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "2e5906a5-af59-489d-89ae-f331c02c759f",
+              "id": "8eb461ad-f0fd-4271-9c6d-3c01ede1db31",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "wallets"
                   ],
                   "host": [
@@ -465,7 +474,7 @@
       "event": []
     },
     {
-      "id": "338e7d18-2627-4458-b729-13334e6fb2d7",
+      "id": "6b161a31-328e-4b71-866e-5cc1c927236b",
       "name": "Orders",
       "description": {
         "content": "",
@@ -473,13 +482,14 @@
       },
       "item": [
         {
-          "id": "85f1b81a-16d6-4169-acfc-e45191d3fa48",
+          "id": "5f27a258-328d-47ad-b1d2-bfa011ba63cd",
           "name": "Create new buy/sell order (Maker)",
           "request": {
             "name": "Create new buy/sell order (Maker)",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "orders"
               ],
               "host": [
@@ -520,10 +530,11 @@
           },
           "response": [
             {
-              "id": "cff60ed6-4d6d-4142-acdf-ecc5681e46a8",
+              "id": "ff4b0dc5-8f51-4d33-ae4b-6b68b0cf1486",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "orders"
                   ],
                   "host": [
@@ -565,16 +576,17 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-order-id\",\n    \"userId\": \"uuid-user-id\",\n    \"side\": \"SELL\",\n    \"cryptoCurrency\": \"BTC\",\n    \"fiatCurrency\": \"THB\",\n    \"price\": \"1500000.00\",\n    \"totalAmount\": \"1.5\",\n    \"filledAmount\": \"0.0\",\n    \"minLimit\": \"100.00\",\n    \"maxLimit\": \"1000000.00\",\n    \"status\": \"OPEN\",\n    \"createdAt\": \"1974-05-16T17:04:33.885Z\",\n    \"updatedAt\": \"1951-06-07T20:16:01.058Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-order-id\",\n    \"userId\": \"uuid-user-id\",\n    \"side\": \"SELL\",\n    \"cryptoCurrency\": \"BTC\",\n    \"fiatCurrency\": \"THB\",\n    \"price\": \"1500000.00\",\n    \"totalAmount\": \"1.5\",\n    \"filledAmount\": \"0.0\",\n    \"minLimit\": \"100.00\",\n    \"maxLimit\": \"1000000.00\",\n    \"status\": \"OPEN\",\n    \"createdAt\": \"1946-08-09T07:10:38.472Z\",\n    \"updatedAt\": \"2003-09-28T11:46:55.475Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "0206fecc-cf6d-402e-b9c5-0285e66fa380",
+              "id": "7260f1af-e762-446d-a362-7344484cf754",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "orders"
                   ],
                   "host": [
@@ -617,11 +629,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "b0f5e319-dedf-4a68-871a-fb0de02851c5",
+              "id": "86c13b56-b839-401b-af03-9109d87e363d",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "orders"
                   ],
                   "host": [
@@ -664,11 +677,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "af21c040-908a-4d20-b018-dfdee06d07ae",
+              "id": "21d0f159-a687-4314-9ae1-882dddc3dc40",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "orders"
                   ],
                   "host": [
@@ -717,13 +731,14 @@
           }
         },
         {
-          "id": "f932683d-7b8d-462c-8b3a-8abb8734d68e",
+          "id": "c4288ce2-fcfb-4757-b385-d08924534482",
           "name": "List all open orders",
           "request": {
             "name": "List all open orders",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "orders"
               ],
               "host": [
@@ -743,10 +758,11 @@
           },
           "response": [
             {
-              "id": "19cf905c-d906-4c5c-99a5-15977ded0924",
+              "id": "a68efe01-13f7-4c7a-ab61-c7596e056644",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "orders"
                   ],
                   "host": [
@@ -772,7 +788,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-order-id\",\n    \"userId\": \"uuid-user-id\",\n    \"side\": \"SELL\",\n    \"cryptoCurrency\": \"BTC\",\n    \"fiatCurrency\": \"THB\",\n    \"price\": \"1500000.00\",\n    \"totalAmount\": \"1.5\",\n    \"filledAmount\": \"0.0\",\n    \"minLimit\": \"100.00\",\n    \"maxLimit\": \"1000000.00\",\n    \"status\": \"OPEN\",\n    \"createdAt\": \"1974-05-16T17:04:33.885Z\",\n    \"updatedAt\": \"1951-06-07T20:16:01.058Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-order-id\",\n    \"userId\": \"uuid-user-id\",\n    \"side\": \"SELL\",\n    \"cryptoCurrency\": \"BTC\",\n    \"fiatCurrency\": \"THB\",\n    \"price\": \"1500000.00\",\n    \"totalAmount\": \"1.5\",\n    \"filledAmount\": \"0.0\",\n    \"minLimit\": \"100.00\",\n    \"maxLimit\": \"1000000.00\",\n    \"status\": \"OPEN\",\n    \"createdAt\": \"1946-08-09T07:10:38.472Z\",\n    \"updatedAt\": \"2003-09-28T11:46:55.475Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             }
@@ -786,7 +802,7 @@
       "event": []
     },
     {
-      "id": "0301f99e-4611-44d2-a61a-ece27c028f45",
+      "id": "591a4b36-e91b-49c2-b36d-7592618ecebe",
       "name": "Trades",
       "description": {
         "content": "",
@@ -794,13 +810,14 @@
       },
       "item": [
         {
-          "id": "02d16e7a-2403-43f9-986d-925f46285cde",
+          "id": "670e04e0-521c-44b8-a590-cad43c05df4d",
           "name": "Create new trade (Taker)",
           "request": {
             "name": "Create new trade (Taker)",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "trades"
               ],
               "host": [
@@ -841,10 +858,11 @@
           },
           "response": [
             {
-              "id": "f3d3ad28-486b-4d5d-aa32-ae1c6988ca0d",
+              "id": "3a799fb3-e9a1-4bbc-8dee-67cae6fe5e7a",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades"
                   ],
                   "host": [
@@ -886,16 +904,17 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2000-04-03T04:56:10.970Z\",\n    \"completedAt\": \"2009-01-11T01:58:28.213Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2012-09-24T08:31:47.830Z\",\n    \"completedAt\": \"1968-09-25T12:38:21.041Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "34ac63fc-5106-493f-b11c-a81acd7d5b9f",
+              "id": "655772fd-3696-4a28-a7d4-a60617baf6ea",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades"
                   ],
                   "host": [
@@ -938,11 +957,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "e489913c-185f-4a33-9fd4-00fb8126add7",
+              "id": "8621768e-2805-4062-a95d-19cec4028675",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades"
                   ],
                   "host": [
@@ -985,11 +1005,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "7080a64b-d0d7-4df1-8a87-609fadc32df2",
+              "id": "7325207c-25e4-43fb-8d24-aceb92710d15",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades"
                   ],
                   "host": [
@@ -1038,13 +1059,14 @@
           }
         },
         {
-          "id": "14e10bc6-cefb-47f8-ab15-86d3f2d643d6",
+          "id": "5aad40c0-5247-4a5d-9e59-e2b7fff77658",
           "name": "Mark trade as PAID (Buyer only)",
           "request": {
             "name": "Mark trade as PAID (Buyer only)",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "trades",
                 ":id",
                 "pay"
@@ -1082,10 +1104,11 @@
           },
           "response": [
             {
-              "id": "da23b72f-1486-401d-95ba-bc33b47f3360",
+              "id": "ebc0f0d8-eb2d-4eae-82a1-f2c69c3f2f6e",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "pay"
@@ -1129,16 +1152,17 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2000-04-03T04:56:10.970Z\",\n    \"completedAt\": \"2009-01-11T01:58:28.213Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2012-09-24T08:31:47.830Z\",\n    \"completedAt\": \"1968-09-25T12:38:21.041Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "80d944b1-a07d-4991-a994-283f4dab7198",
+              "id": "9121bceb-d5ac-497d-80e0-5230f82815b5",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "pay"
@@ -1183,11 +1207,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "76d960ba-54ec-4e3c-8d43-ebfe3ce210bf",
+              "id": "65f4abd1-6ff3-40d1-b501-d78f8389c7c3",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "pay"
@@ -1232,11 +1257,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "6d42dcb2-0475-4f09-a423-cda1c2e19a80",
+              "id": "bd294767-bcf2-411c-8caf-5f7224a7e922",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "pay"
@@ -1287,13 +1313,14 @@
           }
         },
         {
-          "id": "307e5428-d9b2-48dd-9216-1daa4d43e4f9",
+          "id": "8812983e-7616-4d6d-bf52-d5956a3832aa",
           "name": "Release crypto (Seller only)",
           "request": {
             "name": "Release crypto (Seller only)",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "trades",
                 ":id",
                 "release"
@@ -1331,10 +1358,11 @@
           },
           "response": [
             {
-              "id": "cc4c8bc2-2586-47d6-84b1-f029f1fa98de",
+              "id": "847b639d-9008-47d0-a9d5-ca1bec5dc1f9",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "release"
@@ -1378,16 +1406,17 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2000-04-03T04:56:10.970Z\",\n    \"completedAt\": \"2009-01-11T01:58:28.213Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2012-09-24T08:31:47.830Z\",\n    \"completedAt\": \"1968-09-25T12:38:21.041Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "f75abbbb-3c89-4c2c-9970-ea7cdb8f7144",
+              "id": "9ba92e06-77d9-4cd9-8037-63e93f1660e3",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "release"
@@ -1432,11 +1461,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "7575d999-7db1-4e38-af4b-b8cb1337b3e3",
+              "id": "93557fc9-c00a-4a1f-8994-a2579b8e3f41",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "release"
@@ -1481,11 +1511,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "d2a0a2f8-feeb-4a8d-99bf-ba985fa6957a",
+              "id": "3d86d977-add6-4316-8ae9-543319e0385b",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "release"
@@ -1536,13 +1567,14 @@
           }
         },
         {
-          "id": "fd57bf33-3000-465a-83ad-dfe96fa427b9",
+          "id": "7eda26c5-e89b-4b4a-a27d-493b801a06ee",
           "name": "Cancel trade",
           "request": {
             "name": "Cancel trade",
             "description": {},
             "url": {
               "path": [
+                "v1",
                 "trades",
                 ":id",
                 "cancel"
@@ -1580,10 +1612,11 @@
           },
           "response": [
             {
-              "id": "6b025607-ab33-4a91-b1f9-10887535c6b7",
+              "id": "13cee14e-4ae9-4149-92ac-43212ff7e260",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "cancel"
@@ -1627,16 +1660,17 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2000-04-03T04:56:10.970Z\",\n    \"completedAt\": \"2009-01-11T01:58:28.213Z\"\n  }\n}",
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"uuid-trade-id\",\n    \"orderId\": \"uuid-order-id\",\n    \"buyerId\": \"uuid-buyer-id\",\n    \"sellerId\": \"uuid-seller-id\",\n    \"cryptoAmount\": \"0.5\",\n    \"fiatAmount\": \"750000.00\",\n    \"price\": \"1500000.00\",\n    \"status\": \"PENDING_PAYMENT\",\n    \"createdAt\": \"2012-09-24T08:31:47.830Z\",\n    \"completedAt\": \"1968-09-25T12:38:21.041Z\"\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "d972f71e-d0fd-4b52-b595-c181b4850c7a",
+              "id": "485334ea-e8bf-4c78-b00a-e244a4c35013",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "cancel"
@@ -1681,11 +1715,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "dba6d34e-c958-4fa0-97fc-b8301c83aaf6",
+              "id": "3c61d715-d898-4940-b73e-f4d334da5def",
               "name": "Forbidden",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "cancel"
@@ -1730,11 +1765,12 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "1b1e0ed1-05d0-4b0c-8199-3f45415d90d1",
+              "id": "83c562db-b907-44f1-a3e1-535e71376ab6",
               "name": "Internal Server Error",
               "originalRequest": {
                 "url": {
                   "path": [
+                    "v1",
                     "trades",
                     ":id",
                     "cancel"
@@ -1797,7 +1833,7 @@
     }
   ],
   "info": {
-    "_postman_id": "dbf9406d-6fe4-48b8-b006-fabc8bc2d1ee",
+    "_postman_id": "a50d1388-8091-4b31-9a9a-65310b6b86bc",
     "name": "P2P Crypto Exchange API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

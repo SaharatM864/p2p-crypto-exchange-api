@@ -99,6 +99,9 @@ npm run test
 
 # E2E Tests (รวม Concurrency Test)
 npm run test:e2e
+
+# Generate Postman Collection
+npm run postman:export
 ```
 
 ## Project Structure
