@@ -181,10 +181,13 @@ describe('P2P Crypto Exchange — Expert-Level Tests', () => {
               totalAmount: 1,
             })
             .then((res) => ({ status: 'fulfilled' as const, val: res }))
-            .catch((err) => ({ status: 'rejected' as const, err })),
+            .catch((err) => ({
+              status: 'rejected' as const,
+              err: err as unknown,
+            })),
         );
 
-      const results = await Promise.all(requests);
+      const results: RequestResult[] = await Promise.all(requests);
 
       const successCount = results.filter(
         (r) => r.status === 'fulfilled',
@@ -266,10 +269,13 @@ describe('P2P Crypto Exchange — Expert-Level Tests', () => {
             amount: 0.5,
           })
           .then((res) => ({ status: 'fulfilled' as const, val: res }))
-          .catch((err) => ({ status: 'rejected' as const, err })),
+          .catch((err) => ({
+            status: 'rejected' as const,
+            err: err as unknown,
+          })),
       );
 
-      const tradeResults = await Promise.all(tradeRequests);
+      const tradeResults: TradeResult[] = await Promise.all(tradeRequests);
 
       const tradeSuccess = tradeResults.filter(
         (r) => r.status === 'fulfilled',
@@ -509,10 +515,10 @@ describe('P2P Crypto Exchange — Expert-Level Tests', () => {
       });
 
       console.log(
-        `  Before: Available=${initialAvailable}, Locked=${initialLocked}`,
+        `  Before: Available=${initialAvailable.toString()}, Locked=${initialLocked.toString()}`,
       );
       console.log(
-        `  After:  Available=${afterWallet!.availableBalance}, Locked=${afterWallet!.lockedBalance}`,
+        `  After:  Available=${afterWallet!.availableBalance.toString()}, Locked=${afterWallet!.lockedBalance.toString()}`,
       );
 
       // available ต้องลด, locked ต้องเพิ่ม

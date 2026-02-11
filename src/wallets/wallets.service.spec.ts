@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WalletsService } from './wallets.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
-import { Prisma, WalletStatus, CurrencyType } from '@prisma/client';
+import { Prisma, WalletStatus, CurrencyType, Wallet } from '@prisma/client';
 
 describe('WalletsService', () => {
   let service: WalletsService;
@@ -44,7 +44,7 @@ describe('WalletsService', () => {
         },
       ];
 
-      prisma.wallet.findMany.mockResolvedValue(wallets as any);
+      prisma.wallet.findMany.mockResolvedValue(wallets as unknown as Wallet[]);
 
       const result = await service.getMyWallets(userId);
 
