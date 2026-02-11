@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { WalletsService } from './wallets.service';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -22,5 +22,23 @@ export class WalletsController {
   @ApiStandardResponse(WalletDto, { isArray: true })
   getMyWallets(@CurrentUser() user: User) {
     return this.walletsService.getMyWallets(user.id);
+  }
+  @Get('transactions')
+  @ApiAuthEndpoint(
+    'ดูประวัติการทำรายการ (Transaction History)',
+    'แสดงรายการเคลื่อนไหวของกระเป๋าเงิน (Debit/Credit) เรียงจากล่าสุดก่อน สามารถระบุ page และ limit ได้',
+  )
+  // Note: We should probably create a specific DTO for Transaction History response to correspond with ApiStandardResponse
+  // For now using generic object or we can create TransactionHistoryDto later.
+  @ApiStandardResponse(WalletDto, { isArray: true }) // Reusing WalletDto or just standard response wrapper
+  getTransactions(
+    @CurrentUser() user: User,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.walletsService.getUserTransactions(user.id, {
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 20,
+    });
   }
 }

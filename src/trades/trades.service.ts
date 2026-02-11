@@ -383,4 +383,23 @@ export class TradesService {
       });
     });
   }
+  async findOne(userId: string, tradeId: string) {
+    const trade = await this.prisma.trade.findUnique({
+      where: { id: tradeId },
+      include: {
+        order: true,
+        buyer: { select: { id: true, fullName: true, email: true } },
+        seller: { select: { id: true, fullName: true, email: true } },
+      },
+    });
+
+    if (!trade) throw new NotFoundException('Trade not found');
+
+    // Allow only buyer or seller to view details
+    if (trade.buyerId !== userId && trade.sellerId !== userId) {
+      throw new ForbiddenException('Not authorized to view this trade');
+    }
+
+    return trade;
+  }
 }

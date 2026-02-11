@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards, Get } from '@nestjs/common';
 import { TradesService } from './trades.service';
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -53,5 +53,14 @@ export class TradesController {
   @ApiStandardResponse(TradeDto)
   cancel(@CurrentUser() user: User, @Param('id') id: string) {
     return this.tradesService.cancel(user.id, id);
+  }
+  @Get(':id')
+  @ApiAuthEndpoint(
+    'ดูรายละเอียดรายการเทรด',
+    'แสดงข้อมูลรายละเอียดของ Trade รวมถึงข้อมูลผู้ซื้อ ผู้ขาย และ Order ที่เกี่ยวข้อง เฉพาะคู่สัญญา (Buyer/Seller) เท่านั้นที่ดูได้',
+  )
+  @ApiStandardResponse(TradeDto)
+  findOne(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.tradesService.findOne(user.id, id);
   }
 }
